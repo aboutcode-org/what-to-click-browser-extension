@@ -6,12 +6,7 @@
   "icons": {
     "48": "icons/record.svg"
   },
-  "permissions": [
-    "<all_urls>",
-    "activeTab",
-    "tabs",
-    "webNavigation"
-  ],
+  "permissions": ["<all_urls>", "activeTab", "tabs", "webNavigation"],
   "browser_action": {
     "default_icon": "icons/record.svg",
     "default_title": "Record what to click"
@@ -22,17 +17,11 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "content/index.js"
-      ]
+      "matches": ["<all_urls>"],
+      "js": ["content/index.js"]
     }
   ],
-  "web_accessible_resources": [
-    "content/page.html"
-  ],
+  "web_accessible_resources": ["content/page.html"],
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {

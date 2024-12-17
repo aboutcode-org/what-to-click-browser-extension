@@ -1,7 +1,7 @@
-export function download(filename, data, options = { type: 'text/html' }) {
+export function download(filename, data, options = { type: "text/html" }) {
   const blob = new Blob([data], options);
   const url = URL.createObjectURL(blob);
-  const el = document.createElement('a');
+  const el = document.createElement("a");
   el.href = url;
   el.download = filename;
   document.body.appendChild(el);
