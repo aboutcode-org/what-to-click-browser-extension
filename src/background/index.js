@@ -5,28 +5,11 @@ browser.runtime.onMessage.addListener(async ({ type = 'general', data = {} }, se
       return;
     }
     const sessionKey = `images-${currentSession}`;
-    const screenshotPosition = calculateScreenshotPosition({
-      x: data.x,
-      y: data.y,
-      scrollX: data.scrollX,
-      scrollY: data.scrollY,
-    }, data.documentSize, data.size);
-    const image = await browser.tabs.captureVisibleTab({
-      format: 'jpeg',
-      quality: 95,
-      rect: {
-        x: screenshotPosition.x,
-        y: screenshotPosition.y,
-        width: data.size,
-        height: data.size,
-      }
-    });
+    const image = await captureTabWithCursor(data.x, data.y, data.size)
     await localforage.setItem(
       sessionKey,
       [...await localforage.getItem(sessionKey) || [], {
         image,
-        offset: screenshotPosition.offset,
-        size: data.size,
         type: type,
         target: data.target,
         url: data.url,
@@ -78,34 +61,6 @@ browser.browserAction.onClicked.addListener(async () => {
   }
 });
 
-function calculateScreenshotPosition(clickPosition = { x: 0, y: 0, scrollX: 0, scrollY: 0 }, documentSize = { width: 0, height: 0 }, size = 300) {
-  const x = clickPosition.x - size / 2;
-  const y = clickPosition.y - size / 2;
-  const rect = {
-    top: y,
-    left: x,
-    bottom: y + size,
-    right: x + size,
-  };
-  const documentRect = {
-    top: 0,
-    left: 0,
-    bottom: documentSize.height,
-    right: documentSize.width,
-  };
-  const offset = {
-    top: Math.abs(Math.min(0, documentRect.top + rect.top + clickPosition.scrollY)),
-    left: Math.abs(Math.min(0, documentRect.left + rect.left + clickPosition.scrollX)),
-    bottom: Math.abs(Math.min(0, documentRect.bottom - rect.bottom + clickPosition.scrollY)),
-    right: Math.abs(Math.min(0, documentRect.right - rect.right + clickPosition.scrollX)),
-  };
-
-  // Avoid screenshots outside the document
-  const correctedX = x + offset.left - offset.right;
-  const correctedY = y + offset.top - offset.bottom;
-
-  return { x: correctedX, y: correctedY, offset };
-}
 
 browser.webNavigation.onCommitted.addListener(async (event) => {
   const currentSession = await localforage.getItem('currentSession');
@@ -124,3 +79,58 @@ browser.webNavigation.onCommitted.addListener(async (event) => {
     );
   }
 });
+
+
+async function captureTabWithCursor(mouseX, mouseY, windowSize) {
+  try {
+
+    const imageDataUrl = await browser.tabs.captureVisibleTab(
+      {
+        format: 'jpeg',
+        quality: 95,
+      }
+    );
+
+    const img = await loadImage(imageDataUrl);
+
+    const imagePngUrl = browser.runtime.getURL('../content/assets/cursor.png');
+    const cursorImg = await loadImage(imagePngUrl);
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size to match the captured image dimensions
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    // Draw the captured image onto the canvas
+    ctx.drawImage(img, 0, 0);
+
+    const cursorX= (img.width/windowSize.width) *mouseX
+    const cursorY= (img.height/windowSize.height) *mouseY
+
+    // Position the cursor at mouseX, mouseY
+    const cursorSizePercentage = 5;
+    const cursorWidth = img.width * cursorSizePercentage / 100;
+    const cursorHeight = img.height * cursorSizePercentage / 100;
+
+    ctx.drawImage(cursorImg, cursorX - cursorWidth / 2.1, cursorY - cursorHeight / 0.9, cursorWidth, cursorWidth);
+
+    // Convert canvas to a base64 image URL
+    const resultImageUrl = canvas.toDataURL('image/png');
+    return resultImageUrl;
+  } catch (error) {
+    console.error("Error capturing tab or drawing cursor:", error);
+    throw error;
+  }
+}
+
+// Load image and return a Promise
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = (err) => reject(new Error('Error loading image: ' + err));
+    img.src = src;
+  });
+}
