@@ -3,3 +3,7 @@ web-ext-artifacts/
 node_modules/
 build.tar.gz
 .amo-upload-uuid
+
+# Ignore virtual environment
+venv/
+nenv/
