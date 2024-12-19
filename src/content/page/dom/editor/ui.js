@@ -1,6 +1,7 @@
 import van from "../../../deps/mini-van-0.3.8.min.js";
 import { saveHtml } from "../../export/html.js";
 import { saveMarkdown } from "../../export/markdown.js";
+import { saveRST } from "../../export/rst.js";
 import { savePdf } from "../../export/pdf.js";
 
 const { div, button, li, ul } = van.tags;
@@ -43,6 +44,9 @@ export function toggleExportDropdown(anchor) {
         { class: "export-options" },
         ul(Button({ onclick: () => cleanupAfter(savePdf) }, "PDF")),
         ul(Button({ onclick: () => cleanupAfter(saveMarkdown) }, "Markdown")),
+        ul(
+          Button({ onclick: () => cleanupAfter(saveRST) }, "reStructuredText"),
+        ),
         ul(Button({ onclick: () => cleanupAfter(saveHtml) }, "HTML")),
       ),
       anchor,
