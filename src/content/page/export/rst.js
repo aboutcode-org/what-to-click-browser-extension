@@ -1,10 +1,11 @@
 import { download } from "./common/download.js";
 import { applyScrubs, removeScrubs } from "./common/scrubs.js";
 
-export async function saveMarkdown() {
+export async function saveRST() {
   document.querySelectorAll(".screenshot").forEach(applyScrubs);
   const title = document.querySelector("h1").innerText;
-  let markdown = `# ${title}\n\n`;
+  let rst = `${title}\n`;
+  rst += `===================\n\n\n`;
 
   const imagesData = [];
   const imageFileNames = [];
@@ -14,7 +15,7 @@ export async function saveMarkdown() {
     let image = el.querySelector(".step-image .screenshot");
     let description = el.querySelector(".step-description .content");
 
-    markdown += `${index + 1}. ${description.textContent}`;
+    rst += `${index + 1}. ${description.textContent}`;
 
     // If an image is found
     if (image != undefined && image != null) {
@@ -28,29 +29,30 @@ export async function saveMarkdown() {
       imagesData.push(base64Image); // Collect the Base64 image data
       imageFileNames.push(fileName); // Keep track of the image file names
 
-      // Reference the image relatively in markdown
-      markdown += `\n ![${description.textContent.split("\n")[0] + "..."}](images/${fileName})\n\n`;
+      // Reference the image relatively in rst
+      rst += `\n\n   .. image:: images/${fileName}`;
+      rst += `\n      :align: center\n\n`;
     } else {
-      markdown += `\n\n`;
+      rst += `\n\n`;
     }
   });
 
-  // Create the ZIP file with markdown and images
-  await createAndDownloadZip(imagesData, imageFileNames, markdown);
+  // Create the ZIP file with rst and images
+  await createAndDownloadZip(imagesData, imageFileNames, rst);
 
   // Remove scrubs after saving the content
   await removeScrubs();
 }
 
-// Function to create and download a ZIP file with markdown and images
-async function createAndDownloadZip(imagesData, imageFileNames, markdown) {
+// Function to create and download a ZIP file with rst and images
+async function createAndDownloadZip(imagesData, imageFileNames, rst) {
   const zip = new JSZip();
 
   // Create a "What to click" folder in the ZIP
   const stepFilesFolder = zip.folder("What to click");
 
-  // Add the markdown file to the "What to click" folder
-  stepFilesFolder.file("What_to_click.md", markdown);
+  // Add the rst file to the "What to click" folder
+  stepFilesFolder.file("What_to_click.rst", rst);
 
   // Create an "images" folder inside the "What to click" folder
   const imgFolder = stepFilesFolder.folder("images");
