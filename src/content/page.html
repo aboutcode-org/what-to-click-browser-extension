@@ -72,10 +72,12 @@
 
         .step {
           display: flex;
+          flex-direction: column; /* Stack the items vertically */
+          align-items: flex-start; /* Align items to the left */
         }
 
         .step > p {
-          flex: 1;
+          flex: 0 1 auto;
         }
 
         .step {
@@ -94,14 +96,20 @@
 
         .step {
           display: flex;
+          flex-direction: column; /* Stack the items vertically */
+          align-items: flex-start; /* Align items to the left */
         }
 
         .step > p {
-          flex: 1;
+          flex: 0 1 auto;
         }
 
         .step-image > picture {
-          width: 200px !important;
+          width: 700px;
+          max-width: 100%;
+          margin: 0 auto;
+          aspect-ratio: 2;
+          display: grid;
         }
 
         .steps > .step {
@@ -124,6 +132,8 @@
 
         .step {
           display: flex;
+          flex-direction: column; /* Stack the items vertically */
+          align-items: flex-start; /* Align items to the left */
         }
 
         .step-image > picture {
@@ -131,7 +141,7 @@
         }
 
         .step > p {
-          flex: 1;
+          flex: 0 1 auto;
         }
 
         .step {
