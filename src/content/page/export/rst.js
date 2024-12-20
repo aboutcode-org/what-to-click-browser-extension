@@ -31,7 +31,7 @@ export async function saveRST() {
 
       // Reference the image relatively in rst
       rst += `\n\n   .. image:: images/${fileName}`;
-      rst += `\n      :align: center\n\n`;
+      rst += `\n      :width: 600\n\n`;
     } else {
       rst += `\n\n`;
     }
